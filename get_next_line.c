@@ -9,16 +9,83 @@
 #include <unistd.h>
 #include "get_next_line.h"
 
+char *cut_buff(char *buff, int pos)
+{
+    char *tmp_buff;
+    int len;
+    int size;
+    int i;
+
+    for (len = 0; buff[len] != '\0'; len++);
+    size = len - pos;
+    tmp_buff = (char *)malloc((size) * sizeof(char));
+    tmp_buff[(size - 1)] = '\0';
+    for (i = 0; buff[(pos + i + 1)] != '\0'; i++)
+        tmp_buff[i] = buff[(pos + i + 1)];
+    return tmp_buff;
+}
+
+char *to_display(char *buff, int pos)
+{
+    char *tmp_display;
+
+    tmp_display = (char *)malloc((pos + 1) * sizeof(char));
+    tmp_display[pos] = '\0';
+    for (int i = 0; i < pos; i++)
+        tmp_display[i] = buff[i];
+    return tmp_display;
+}
+
+char *save_buff(char *buffer, char *buff, int *size)
+{
+    char *tmp_buffer;
+    int len = 0;
+    int len2 = 0;
+    int i;
+    int j = 0;
+
+    for (len = 0; buffer[len] != '\0'; len++);
+    for (len2 = 0; buff[len2] != '\0'; len2 += 1);
+    *size = (len + len2);
+    tmp_buffer = (char *)malloc((*size + 1) * sizeof(char));
+    tmp_buffer[*size] = '\0';
+    for (i = 0; i < len2; i++)
+        tmp_buffer[i] = buff[i];
+    for (; i < *size; i++)
+        tmp_buffer[i] = buffer[j++];
+    return tmp_buffer;
+}
+
+int n_finder(char *buffer)
+{
+    int i;
+
+    for (i = 0; buffer[i] != '\0'; i++)
+        if (buffer[i] == '\n')
+            return i;
+    return -1;
+}
+
 char *get_next_line(int fd)
 {
+    static char *buff = "\0";
+    static int size;
+    int pos;
     char *buffer = (char *)malloc((READ_SIZE + 1) * sizeof(char));
+    char *display;
     ssize_t check = 0;
 
     buffer[READ_SIZE] = '\0';
     check = read(fd, buffer, READ_SIZE);
-    if (check <= 0)
+    pos = n_finder(buff);
+    if (check <= 0 && pos == -1)
         return NULL;
-    else if (buffer[READ_SIZE - 1] == '\n')
-        buffer[READ_SIZE - 1] = '\0';
-    return buffer;
+    buff = save_buff(buffer, buff, &size);
+    if (pos == -1)
+        get_next_line(fd);
+    if (pos >= 0) {
+        display = to_display(buff, pos);
+        buff = cut_buff(buff, pos);
+        return display;
+    }
 }
