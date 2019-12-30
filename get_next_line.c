@@ -78,8 +78,8 @@ char *get_next_line(int fd)
     if ((fd < 0) || (read(fd, buffer, READ_SIZE) <= 0 && n_finder(buff) == -1))
         return NULL;
     buffer[READ_SIZE] = '\0';
-    pos = n_finder(buff);
     buff = save_buff(buffer, buff, &size);
+    pos = n_finder(buff);
     if (pos == -1)
         get_next_line(fd);
     if (pos >= 0) {
