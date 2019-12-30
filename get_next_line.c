@@ -36,27 +36,31 @@ char *to_display(char *buff, int pos)
     return tmp_display;
 }
 
-char *save_buff(char *buffer, char *buff, int *size)
+char *save_buff(char *buffer, char *buff, int *bool1, int opt)
 {
     char *tmp_buffer;
     int len = 0;
     int len2 = 0;
     int i;
-    int j = 0;
+    int size;
 
+    if (opt == 1)
+        *bool1 += 1;
     for (len = 0; buffer[len] != '\0'; len++);
     for (len2 = 0; buff[len2] != '\0'; len2 += 1);
-    *size = (len + len2);
-    tmp_buffer = (char *)malloc((*size + 1) * sizeof(char));
-    tmp_buffer[*size] = '\0';
+    size = (len + len2);
+    tmp_buffer = (char *)malloc((size + 1) * sizeof(char));
+    tmp_buffer[size] = '\0';
     for (i = 0; i < len2; i++)
         tmp_buffer[i] = buff[i];
-    for (; i < *size; i++)
+    for (int j = 0; i < size; i++)
         tmp_buffer[i] = buffer[j++];
+    if ((opt == 1) && (tmp_buffer[0] == '\0'))
+        *bool1 += 1;
     return tmp_buffer;
 }
 
-int n_finder(char *buffer)
+int n_fd(char *buffer)
 {
     int i;
 
@@ -69,17 +73,18 @@ int n_finder(char *buffer)
 char *get_next_line(int fd)
 {
     static char *buff = "\0";
-    static int size;
+    static int bool1 = 0;
     int pos = 0;
     char *buffer = (char *)malloc((READ_SIZE + 1) * sizeof(char));
     char *display;
-    ssize_t check = 10;
 
-    if ((fd < 0) || (read(fd, buffer, READ_SIZE) <= 0 && n_finder(buff) == -1))
-        return NULL;
     buffer[READ_SIZE] = '\0';
-    buff = save_buff(buffer, buff, &size);
-    pos = n_finder(buff);
+    if ((fd < 0) || (read(fd, buffer, READ_SIZE) <= 0 && n_fd(buff) == -1)) {
+        display = save_buff(buffer, buff, &bool1, 1);
+        return (bool1 == 1) ? display : NULL;
+    }
+    buff = save_buff(buffer, buff, &bool1, 0);
+    pos = n_fd(buff);
     if (pos == -1)
         get_next_line(fd);
     if (pos >= 0) {
