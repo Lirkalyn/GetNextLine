@@ -70,16 +70,15 @@ char *get_next_line(int fd)
 {
     static char *buff = "\0";
     static int size;
-    int pos;
+    int pos = 0;
     char *buffer = (char *)malloc((READ_SIZE + 1) * sizeof(char));
     char *display;
-    ssize_t check = 0;
+    ssize_t check = 10;
 
-    buffer[READ_SIZE] = '\0';
-    check = read(fd, buffer, READ_SIZE);
-    pos = n_finder(buff);
-    if (check <= 0 && pos == -1)
+    if ((fd < 0) || (read(fd, buffer, READ_SIZE) <= 0 && n_finder(buff) == -1))
         return NULL;
+    buffer[READ_SIZE] = '\0';
+    pos = n_finder(buff);
     buff = save_buff(buffer, buff, &size);
     if (pos == -1)
         get_next_line(fd);
