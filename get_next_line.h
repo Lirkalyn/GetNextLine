@@ -8,6 +8,8 @@
 #ifndef _GNL_H_
 #define _GNL_H_
 
+#ifndef READ_SIZE
 #define READ_SIZE 15
+#endif
 
 #endif
