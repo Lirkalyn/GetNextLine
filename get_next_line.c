@@ -78,6 +78,8 @@ char *get_next_line(int fd)
     char *buffer = (char *)malloc((READ_SIZE + 1) * sizeof(char));
     char *display;
 
+    if (buffer == NULL)
+        return NULL;
     buffer[READ_SIZE] = '\0';
     if ((fd < 0) || (read(fd, buffer, READ_SIZE) <= 0 && n_fd(buff) == -1)) {
         display = save_buff(buffer, buff, &bool1, 1);
